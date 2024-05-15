@@ -39,7 +39,7 @@ app.post('/save-contact', (req, res) => {
         res.status(400).send(`Name and number are required...`);
         return;
     }
-    let formattedNumber = formatNumber(number);
+    const formattedNumber = formatNumber(number);
     if (!formattedNumber) {
         res.status(400).send(`Number (${number}) is in wrong format...`);
         return;
@@ -49,10 +49,57 @@ app.post('/save-contact', (req, res) => {
     res.status(200).send(`Contact ${name} (${formattedNumber}) added successfully`);
 })
 
+app.put('/edit-contact', (req, res) => {
+    const {oldName, oldNumber, newName, newNumber} = req.body;
+    if (!oldName || !oldNumber || !newName || !newNumber) {
+        res.status(400).send(`oldName, oldNumber, newName and newNumber are required...`);
+        return;   
+    }
+
+    const formattedOldNumber = formatNumber(oldNumber);
+    if (!formattedOldNumber) {
+        res.status(400).send(`Old number (${number}) is in wrong format...`);
+        return;
+    }
+
+    const formattedNewNumber = formatNumber(newNumber);
+    if (!formattedNewNumber) {
+        res.status(400).send(`New number (${number}) is in wrong format...`);
+        return;
+    }
+
+    for (let i = 0; i < contacts.length; i++) {
+        if (contacts[i]["name"] === oldName && contacts[i]["number"] === formattedOldNumber) {
+            contacts[i]["name"] = newName;
+            contacts[i]["number"] = formattedNewNumber;
+            res.status(200).send(`Updated contact ${oldName} (${formattedOldNumber}) to ${newName} (${formattedNewNumber})`)
+            return;
+        }
+    }
+    res.status(400).send(`No contact ${oldName} (${formattedOldNumber}) was found...`)
+})
+
+app.delete('/delete-contact', (req, res) => {
+    const {name, number} = req.body;
+    if (!name || !number) {
+        res.status(400).send(`Name and number are required...`);
+        return;
+    }
+
+    const formattedNumber = formatNumber(number);
+    if (!formattedNumber) {
+        res.status(400).send(`Number (${number}) is in wrong format...`);
+        return;
+    }
+
+    contacts = contacts.filter(value => value["name"] != name && value["number"] != formattedNumber);
+    res.status(200).send(`Contact ${name} (${formattedNumber}) deleted successfully`);
+})
+
 app.get('/contacts', (req, res) => {
     res.status(200).json(contacts);
 })
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+    console.log(`Phone Book app listening on port ${port}`);
 })
